@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>bg.uni-sofia.bsmarkov</groupId>
+    <artifactId>nlp-predict</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <commons-httpclient.version>3.1</commons-httpclient.version>
+        <slf4j-log4j12.version>1.7.25</slf4j-log4j12.version>
+        <lombok-maven.version>1.18.20.0</lombok-maven.version>
+        <lombok.version>1.18.22</lombok.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
+        <junit.version>4.8.1</junit.version>
+
+        <nd4j.version>1.0.0-beta7</nd4j.version>
+        <!--<nd4j.backend>nd4j-cuda-10.0</nd4j.backend>-->
+        <nd4j.backend>nd4j-native-platform</nd4j.backend>
+        <rl4j.version>1.0.0-beta7</rl4j.version>
+        <dl4j.version>1.0.0-beta7</dl4j.version>
+        <dl4j-cuda.version>1.0.0-beta7</dl4j-cuda.version>
+
+        <scala.binary.version>2.11</scala.binary.version>
+        <com.squareup.retrofit2.version>2.3.0</com.squareup.retrofit2.version>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok-maven</artifactId>
+            <version>${lombok-maven.version}</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+            <version>${commons-httpclient.version}</version>
+        </dependency>
+
+        <!-- AI -->
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>${nd4j.backend}</artifactId>
+            <version>${nd4j.version}</version>
+        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.deeplearning4j</groupId>-->
+            <!--<artifactId>deeplearning4j-cuda-10.0</artifactId>-->
+            <!--<version>${dl4j-cuda.version}</version>-->
+        <!--</dependency>-->
+        <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>deeplearning4j-core</artifactId>
+            <version>${dl4j.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>datavec-api</artifactId>
+                    <groupId>org.datavec</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>datavec-data-image</artifactId>
+                    <groupId>org.datavec</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hdf5-platform</artifactId>
+                    <groupId>org.bytedeco.javacpp-presets</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>rl4j-core</artifactId>
+            <version>${rl4j.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>javacv</artifactId>
+                    <groupId>org.bytedeco</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>opencv-platform</artifactId>
+                    <groupId>org.bytedeco.javacpp-presets</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>ffmpeg-platform</artifactId>
+                    <groupId>org.bytedeco.javacpp-presets</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>ffmpeg</artifactId>
+                    <groupId>org.bytedeco.javacpp-presets</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- AI end-->
+
+        <!-- Core DL4J functionality -->
+        <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>deeplearning4j-nlp</artifactId>
+            <version>${dl4j.version}</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-all -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.10.19</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
