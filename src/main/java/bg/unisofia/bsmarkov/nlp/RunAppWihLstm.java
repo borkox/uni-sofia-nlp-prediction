@@ -60,15 +60,15 @@ public class RunAppWihLstm {
 
     }
 
-//    private static INDArray encodeInput(WeightLookupTable<VocabWord> lookupTable, VocabWord element) {
-//        return lookupTable.vector(element.getWord()).reshape(1, lookupTable.layerSize());
-//    }
-    private static INDArray encodeInput(WeightLookupTable<VocabWord> lookupTable, VocabWord vocabWord) {
-        String word = vocabWord.getWord();
-        VocabCache<VocabWord> vocabCache = lookupTable.getVocabCache();
-        INDArray indArray = Nd4j.zeros(1, vocabCache.numWords()).putScalar(vocabCache.indexOf(word), 1);
-        return indArray;
+    private static INDArray encodeInput(WeightLookupTable<VocabWord> lookupTable, VocabWord element) {
+        return lookupTable.vector(element.getWord()).reshape(1, lookupTable.layerSize());
     }
+//    private static INDArray encodeInput(WeightLookupTable<VocabWord> lookupTable, VocabWord vocabWord) {
+//        String word = vocabWord.getWord();
+//        VocabCache<VocabWord> vocabCache = lookupTable.getVocabCache();
+//        INDArray indArray = Nd4j.zeros(1, vocabCache.numWords()).putScalar(vocabCache.indexOf(word), 1);
+//        return indArray;
+//    }
 
     private static Collection<String> decodeFromOutput(
             SequenceVectors<VocabWord> vectors,

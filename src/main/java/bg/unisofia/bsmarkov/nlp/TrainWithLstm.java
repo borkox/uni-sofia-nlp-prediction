@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.deeplearning4j.datasets.iterator.impl.ListDataSetIterator;
 import org.deeplearning4j.models.embeddings.WeightLookupTable;
 import org.deeplearning4j.models.embeddings.loader.VectorsConfiguration;
 import org.deeplearning4j.models.sequencevectors.SequenceVectors;
@@ -16,23 +15,15 @@ import org.deeplearning4j.models.sequencevectors.transformers.impl.SentenceTrans
 import org.deeplearning4j.models.word2vec.VocabWord;
 import org.deeplearning4j.models.word2vec.wordstore.VocabCache;
 import org.deeplearning4j.models.word2vec.wordstore.VocabConstructor;
-import org.deeplearning4j.models.word2vec.wordstore.inmemory.AbstractCache;
 import org.deeplearning4j.nn.conf.BackpropType;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
-import org.deeplearning4j.nn.conf.layers.DropoutLayer;
 import org.deeplearning4j.nn.conf.layers.LSTM;
 import org.deeplearning4j.nn.conf.layers.RnnOutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
-import org.deeplearning4j.rl4j.learning.async.a3c.discrete.A3CDiscrete;
-import org.deeplearning4j.rl4j.learning.async.a3c.discrete.A3CDiscreteDense;
-import org.deeplearning4j.rl4j.network.ac.ActorCriticFactorySeparateStdDense;
-import org.deeplearning4j.rl4j.policy.ACPolicy;
-import org.deeplearning4j.rl4j.space.Box;
-import org.deeplearning4j.rl4j.util.DataManager;
 import org.deeplearning4j.text.sentenceiterator.BasicLineIterator;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
@@ -41,7 +32,6 @@ import org.nd4j.common.util.SerializationUtils;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
-import org.nd4j.linalg.dataset.api.iterator.DataSetIteratorFactory;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Adam;
 import org.nd4j.linalg.lossfunctions.LossFunctions.LossFunction;
@@ -101,8 +91,8 @@ public class TrainWithLstm {
         log.info("Test words nearest: (day) = {}", vectors.wordsNearest("day", 3));
 
         //Set up network configuration:
-//        int inputVectorSz = lookupTable.layerSize();
-        int inputVectorSz = vocabCache.numWords();
+        int inputVectorSz = lookupTable.layerSize();
+//        int inputVectorSz = vocabCache.numWords();
         int outputVectorSz = vocabCache.numWords();
 
         int layerSize = 50;
@@ -120,8 +110,8 @@ public class TrainWithLstm {
                         .activation(Activation.RELU).build())
                 .layer(new RnnOutputLayer.Builder(LossFunction.MCXENT).activation(Activation.SOFTMAX)
                         .nIn(layerSize).nOut(outputVectorSz).build())
-//                .backpropType(BackpropType.TruncatedBPTT).tBPTTForwardLength(50)
-//                .tBPTTBackwardLength(50)
+                .backpropType(BackpropType.TruncatedBPTT).tBPTTForwardLength(50)
+                .tBPTTBackwardLength(50)
                 .build();
 
         MultiLayerNetwork net = new MultiLayerNetwork(conf);
@@ -162,7 +152,7 @@ public class TrainWithLstm {
             }
         }
         log.info("Start learn network");
-        for(int i=0 ; i < 100; i ++) {
+        for(int i=0 ; i < 120; i ++) {
             log.info("Epoch: {}", i);
             Collections.shuffle(datasetList);
             for (DataSet dataSet : datasetList) {
@@ -181,14 +171,14 @@ public class TrainWithLstm {
         INDArray indArray = Nd4j.zeros(1, vocabCache.numWords()).putScalar(vocabCache.indexOf(word), 1);
         return indArray;
     }
-    private static INDArray encodeInput(WeightLookupTable<VocabWord> lookupTable, VocabWord vocabWord) {
-        String word = vocabWord.getWord();
-        VocabCache<VocabWord> vocabCache = lookupTable.getVocabCache();
-        INDArray indArray = Nd4j.zeros(1, vocabCache.numWords()).putScalar(vocabCache.indexOf(word), 1);
-        return indArray;
-    }
-//
 //    private static INDArray encodeInput(WeightLookupTable<VocabWord> lookupTable, VocabWord vocabWord) {
-//        return lookupTable.vector(vocabWord.getWord());
+//        String word = vocabWord.getWord();
+//        VocabCache<VocabWord> vocabCache = lookupTable.getVocabCache();
+//        INDArray indArray = Nd4j.zeros(1, vocabCache.numWords()).putScalar(vocabCache.indexOf(word), 1);
+//        return indArray;
 //    }
+
+    private static INDArray encodeInput(WeightLookupTable<VocabWord> lookupTable, VocabWord vocabWord) {
+        return lookupTable.vector(vocabWord.getWord());
+    }
 }
