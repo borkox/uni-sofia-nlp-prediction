@@ -24,6 +24,7 @@ import org.deeplearning4j.rl4j.space.Box;
 import org.deeplearning4j.rl4j.util.DataManager;
 import org.deeplearning4j.text.sentenceiterator.BasicLineIterator;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
+import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.LowCasePreProcessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 import org.nd4j.common.util.SerializationUtils;
@@ -53,9 +54,10 @@ public class MakeLookupTable {
         /*
             Now we need the way to convert lines into Sequences of VocabWords.
             In this example that's SentenceTransformer
+            For preprocessing we only put lowercase.
          */
         TokenizerFactory t = new DefaultTokenizerFactory();
-        t.setTokenPreProcessor(new CommonPreprocessor());
+        t.setTokenPreProcessor(new LowCasePreProcessor());
 
         SentenceTransformer transformer = new SentenceTransformer.Builder()
                 .iterator(underlyingIterator)
@@ -98,7 +100,7 @@ public class MakeLookupTable {
             Now we can build AbstractVectors model, that suits our needs
          */
         SequenceVectors<VocabWord> vectors = new SequenceVectors.Builder<VocabWord>(new VectorsConfiguration())
-                // minimum number of occurencies for each element in training corpus. All elements below this value will be ignored
+                // minimum number of occurrences for each element in training corpus. All elements below this value will be ignored
                 // Please note: this value has effect only if resetModel() set to TRUE, for internal model building. Otherwise it'll be ignored, and actual vocabulary content will be used
                 .minWordFrequency(1)
 

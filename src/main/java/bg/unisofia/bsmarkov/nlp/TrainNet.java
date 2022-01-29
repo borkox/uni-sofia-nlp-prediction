@@ -25,7 +25,7 @@ import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.deeplearning4j.text.sentenceiterator.BasicLineIterator;
-import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
+import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.LowCasePreProcessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 import org.nd4j.common.util.SerializationUtils;
@@ -37,10 +37,18 @@ import org.nd4j.linalg.learning.config.Adam;
 import org.nd4j.linalg.lossfunctions.LossFunctions.LossFunction;
 
 @Slf4j
-public class TrainWithLstm {
+public class TrainNet {
+
+    public static final int TRAIN_EPOCHS = 200;
+    public static final int PRINT_ITERATIONS = 10;
+    public static final int PRINT_PROCESSING_SENTENCES = 30;
+    public static final String TRAIN_CORPUS = "/raw_sentences_train.txt";
+    public static final double LEARNING_RATE = 0.005;
+    public static final double L2_REGULARIZATION = 0.000001;
+    public static final int LAYER_SIZE = 80;
 
     public static void main(String[] args) throws IOException {
-        String pathname = TrainWithLstm.class.getResource("/raw_sentences_simple.txt").getFile();
+        String pathname = TrainNet.class.getResource(TRAIN_CORPUS).getFile();
         log.info("Reading from pathname: {}", pathname);
         File file = new File(pathname);
 
@@ -55,7 +63,7 @@ public class TrainWithLstm {
             In this example that's SentenceTransformer
          */
         TokenizerFactory t = new DefaultTokenizerFactory();
-        t.setTokenPreProcessor(new CommonPreprocessor());
+        t.setTokenPreProcessor(new LowCasePreProcessor());
 
         SentenceTransformer transformer = new SentenceTransformer.Builder()
                 .iterator(underlyingIterator)
@@ -92,31 +100,29 @@ public class TrainWithLstm {
 
         //Set up network configuration:
         int inputVectorSz = lookupTable.layerSize();
-//        int inputVectorSz = vocabCache.numWords();
         int outputVectorSz = vocabCache.numWords();
 
-        int layerSize = 50;
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .seed(12345)
-//                .l2(0.000001)
+                .l2(L2_REGULARIZATION)
                 .weightInit(WeightInit.XAVIER)
-                .updater(new Adam(0.005))
+                .updater(new Adam(LEARNING_RATE))
                 .list()
-                .layer(new LSTM.Builder().nIn(inputVectorSz).nOut(layerSize)
+                .layer(new LSTM.Builder().nIn(inputVectorSz).nOut(LAYER_SIZE)
                         .activation(Activation.TANH).build())
-                .layer(new LSTM.Builder().nIn(layerSize).nOut(layerSize)
+                .layer(new LSTM.Builder().nIn(LAYER_SIZE).nOut(LAYER_SIZE)
                         .activation(Activation.TANH).build())
-                .layer(new DenseLayer.Builder().nIn(layerSize).nOut(layerSize)
+                .layer(new DenseLayer.Builder().nIn(LAYER_SIZE).nOut(LAYER_SIZE)
                         .activation(Activation.RELU).build())
                 .layer(new RnnOutputLayer.Builder(LossFunction.MCXENT).activation(Activation.SOFTMAX)
-                        .nIn(layerSize).nOut(outputVectorSz).build())
+                        .nIn(LAYER_SIZE).nOut(outputVectorSz).build())
                 .backpropType(BackpropType.TruncatedBPTT).tBPTTForwardLength(50)
                 .tBPTTBackwardLength(50)
                 .build();
 
         MultiLayerNetwork net = new MultiLayerNetwork(conf);
         net.init();
-        net.setListeners(new ScoreIterationListener(10));
+        net.setListeners(new ScoreIterationListener(PRINT_ITERATIONS));
 
         //Print the  number of parameters in the network (and for each layer)
         log.info("Summary: {} ", net.summary());
@@ -147,12 +153,12 @@ public class TrainWithLstm {
 
             datasetList.add(ds);
             sequence ++;
-            if (sequence % 30 == 0) {
+            if (sequence % PRINT_PROCESSING_SENTENCES == 0) {
                 log.info("Processing sentence {}", sequence);
             }
         }
         log.info("Start learn network");
-        for(int i=0 ; i < 120; i ++) {
+        for(int i=0 ; i < TRAIN_EPOCHS; i ++) {
             log.info("Epoch: {}", i);
             Collections.shuffle(datasetList);
             for (DataSet dataSet : datasetList) {
@@ -165,19 +171,18 @@ public class TrainWithLstm {
 
     }
 
+    /**
+     * Output vectors are on-hot vectors.
+     */
     private static INDArray encodeOutput(WeightLookupTable<VocabWord> lookupTable, VocabWord vocabWord) {
         String word = vocabWord.getWord();
         VocabCache<VocabWord> vocabCache = lookupTable.getVocabCache();
-        INDArray indArray = Nd4j.zeros(1, vocabCache.numWords()).putScalar(vocabCache.indexOf(word), 1);
-        return indArray;
+        return Nd4j.zeros(1, vocabCache.numWords()).putScalar(vocabCache.indexOf(word), 1);
     }
-//    private static INDArray encodeInput(WeightLookupTable<VocabWord> lookupTable, VocabWord vocabWord) {
-//        String word = vocabWord.getWord();
-//        VocabCache<VocabWord> vocabCache = lookupTable.getVocabCache();
-//        INDArray indArray = Nd4j.zeros(1, vocabCache.numWords()).putScalar(vocabCache.indexOf(word), 1);
-//        return indArray;
-//    }
 
+    /**
+     * Input vectors are according to word2vec algorithm.
+     */
     private static INDArray encodeInput(WeightLookupTable<VocabWord> lookupTable, VocabWord vocabWord) {
         return lookupTable.vector(vocabWord.getWord());
     }
