@@ -1,5 +1,5 @@
 
-#NLP : Word prediction
+#NLP : Word prediction with deep learning
 
 ## Intro
 This is a NLP university software project
