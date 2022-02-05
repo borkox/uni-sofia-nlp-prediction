@@ -94,6 +94,8 @@ one-hot vectors for the input, then RNN would return just learnt data
 and nothing more.
 
 ### Neural Network Architecture:
+
+![Network architecture](docs/network.png)
 <pre>
 
 ======================================================================================
