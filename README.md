@@ -11,8 +11,13 @@ for demonstration.
 
 TASK: **We need to generate next word by given sequence of words.**
 
+**This is autocompletion tool**
+It is similar to what you see from Google, but much simpler:
+
+![Google's autocomplete](docs/screen.png)
+
 For the task I use a pre-selected corpus.
-I also put the pre-trained network, so one can 
+I also put the pre-trained network, so everyone can 
 start by running examples directly.
 
 ## Implementation
@@ -190,4 +195,14 @@ of course that would require much training and tuning time from the developer.
   Later on trainings can fork from that pre-trained network
   and learn new data set easily.
 
+## Sources
+
+ [1] Deep Learning, Josh Patterson and Adam Gibson, 2017, ISBN, 978-1-491-91425-0
+
+ [2] Speech and Language Processing. Daniel Jurafsky & James H. Martin, 2021,
+https://web.stanford.edu/~jurafsky/slp3/3.pdf 
+
+ [3] Efficient Estimation of Word Representations in Vector Space, Mikolov, Corrado, Chen, Dean, 2013, https://arxiv.org/pdf/1301.3781.pdf 
+
+ [4] Speech and Language Processing. Daniel Jurafsky & James H. Martin., 2022. https://web.stanford.edu/~jurafsky/slp3/9.pdf 
 
